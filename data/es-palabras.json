@@ -1,0 +1,15 @@
+{
+  "facil": [
+    { "hueco": "C__A", "opciones": ["CAJA", "CASA", "CENA", "CIMA"], "ok": 1, "pista": "Hogar" },
+    { "hueco": "P_A",  "opciones": ["PIE", "PALO", "PEA", "PAN"], "ok": 3, "pista": "Se come" },
+    { "hueco": "S__A", "opciones": ["SOPA", "SEÑA", "SALA", "SOGA"], "ok": 0, "pista": "Comida" }
+  ],
+  "media": [
+    { "hueco": "CA__TA", "opciones": ["CARTA","CANCHA","CASITA","CABINA"], "ok": 0, "pista": "Se envía" },
+    { "hueco": "PA__ELA","opciones": ["PASTELA","PANELA","PAELLA","PALETA"], "ok": 2, "pista": "Comida" }
+  ],
+  "avanzada": [
+    { "hueco": "__TERIOR", "opciones": ["ANTERIOR","ENTERIOR","INTERIOR","OTERIOR"], "ok": 2 },
+    { "hueco": "ME__RIA",  "opciones": ["MERARIA","MEMORIA","MEJERIA","METERIA"], "ok": 1 }
+  ]
+}

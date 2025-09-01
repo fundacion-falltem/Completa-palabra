@@ -1,14 +1,12 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const VERSION = 'v1.0.0';
+  const VERSION = 'v1.1.0 (JSON externo + fallback)';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
-  // ===== Contenido (simple, interno) =====
-  // Estructura: cada ítem define "hueco" (con _ para letras faltantes),
-  // "opciones" (A–D) y "ok" índice correcto (0..3). "pista" opcional.
-  const BANK = {
+  // ===== Banco interno (fallback de seguridad) =====
+  const BANK_FALLBACK = {
     facil: [
       { hueco: 'C__A', opciones: ['CAJA', 'CASA', 'CENA', 'CIMA'], ok: 1, pista:'Hogar' },
       { hueco: 'P_A',  opciones: ['PIE', 'PALO', 'PEA', 'PAN'], ok: 3, pista:'Se come' },
@@ -30,10 +28,53 @@ document.addEventListener('DOMContentLoaded', () => {
       { hueco: 'ME__RIA', opciones: ['MERARIA','MEMORIA','MEJERIA','METERIA'], ok:1 },
       { hueco: '_EM______IÓN', opciones: ['DEMANIPIÓN','DEMERITIÓN','DEFINICIÓN','DEMOLICIÓN'], ok:2 },
       { hueco: 'CO__NICACIÓN', opciones: ['COMUNICACIÓN','CONUNICACIÓN','COFUNICACIÓN','COTUNICACIÓN'], ok:0 },
-      { hueco: 'RE__RCIMIENTO', opciones: ['RECURCIMIENTO','REINFORCIMIENTO','RECRECIMIENTO','REAPRENDIMIENTO'], ok:1, pista:'sinónimo de fortalecimiento' },
+      { hueco: 'RE__RCIMIENTO', opciones: ['RECURCIMIENTO','REINFORCIMIENTO','RECRECIMIENTO','REAPRENDIMIENTO'], ok:1, pista:'fortalecimiento' },
       { hueco: 'SI__ÓN', opciones: ['SIALÓN','SITUACIÓN','SIMIÓN','SIRCIÓN'], ok:1 },
     ]
   };
+
+  // ===== Banco activo (externo con fallback) =====
+  let BANK = BANK_FALLBACK;
+  let catalogoListo = false;
+
+  async function cargarBanco(url){
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('No se pudo cargar el JSON');
+    const data = await res.json();
+    validarBanco(data);
+    return data;
+  }
+
+  function validarBanco(data){
+    const niveles = ['facil','media','avanzada'];
+    for (const n of niveles){
+      if (!Array.isArray(data[n])) throw new Error(`Falta arreglo "${n}"`);
+      for (const item of data[n]){
+        if (typeof item.hueco !== 'string' || !Array.isArray(item.opciones) || item.opciones.length !== 4)
+          throw new Error(`Ítem inválido en ${n}: requiere {hueco, opciones[4], ok}`);
+        if (!Number.isInteger(item.ok) || item.ok < 0 || item.ok > 3)
+          throw new Error(`"ok" inválido en ${n} (debe ser 0..3)`);
+        if (item.pista != null && typeof item.pista !== 'string')
+          throw new Error(`"pista" inválida en ${n}`);
+      }
+    }
+  }
+
+  async function initBanco(){
+    if (catalogoListo) return;
+    const params = new URLSearchParams(location.search);
+    const url = params.get('bank') || './data/es-palabras.json';
+    try{
+      const data = await cargarBanco(url);
+      BANK = data;
+      console.log('📚 Banco externo activo:', url);
+    }catch(e){
+      console.warn('⚠️ Banco externo no disponible. Uso fallback interno:', e.message);
+      BANK = BANK_FALLBACK;
+    }finally{
+      catalogoListo = true;
+    }
+  }
 
   // ===== Estado
   let nivel = 'facil';
@@ -80,15 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ronda >= rondasTotales){ finJuego(); return; }
 
     const pool = BANK[nivel];
-    // seleccionar un item y construir opciones posicionando correcta A–D aleatoriamente
     const base = pick(pool);
-    const opciones = base.opciones.slice(); // 4
-    const correcta = opciones[base.ok];
 
-    // barajar manteniendo mapeo de correcta
-    const indices = [0,1,2,3];
-    barajar(indices);
-    const opcionesOrdenadas = indices.map(i => opciones[i]);
+    // barajar opciones manteniendo correcta
+    const indices = [0,1,2,3]; barajar(indices);
+    const opcionesOrdenadas = indices.map(i => base.opciones[i]);
     const idxCorrecta = indices.indexOf(base.ok);
 
     // Render
@@ -97,9 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (base.pista){ pistaEl.hidden = false; setTxt(pistaEl, `Pista: ${base.pista}`); }
     else { pistaEl.hidden = true; setTxt(pistaEl, ''); }
 
-    renderOpciones(opcionesOrdenadas, idxCorrecta);
+    renderOpciones(opcionesOrdenadas, idxCorrecta, base.opciones[base.ok]);
 
-    itemActual = { correcta, idxCorrecta };
+    itemActual = { correcta: base.opciones[base.ok], idxCorrecta };
     setTxt(feedbackEl, '');
     feedbackEl.className = 'feedback muted';
 
@@ -172,7 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===== Eventos
-  btnComenzar.addEventListener('click', ()=>{
+  btnComenzar.addEventListener('click', async ()=>{
+    await initBanco(); // asegura carga del JSON externo o fallback
+
     nivel = difSel.value;
     rondasTotales = Number(ronSel.value);
 
