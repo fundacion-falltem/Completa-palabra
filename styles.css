@@ -13,6 +13,10 @@
 
   --btn-primary-bg:#22c55e; --btn-primary-fg:#0a0a0a;
   --btn-sec-bg:#0ea5e9;     --btn-sec-fg:#0a0a0a;
+
+  /* Timer */
+  --timer-ok:#22c55e;
+  --timer-warn:#ef4444;
 }
 
 [data-theme="light"]{
@@ -22,6 +26,9 @@
 
   --btn-primary-bg:#22c55e; --btn-primary-fg:#0a0a0a;
   --btn-sec-bg:#0284c7;     --btn-sec-fg:#ffffff;
+
+  --timer-ok:#16a34a;
+  --timer-warn:#dc2626;
 }
 
 *{box-sizing:border-box}
@@ -60,9 +67,34 @@ select{
 .btn.secundario{ background:var(--btn-sec-bg);   color:var(--btn-sec-fg); }
 .btn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
 
+/* ===== Juego ===== */
 .juego{ display:grid; gap: .8rem; }
+
 .progresoBar{height:10px; background:var(--border); border-radius:999px; overflow:hidden}
 #pbFill{height:100%; width:0%; background:var(--btn-primary-bg); transition:width .2s linear}
+
+/* Timer */
+.timer-text{
+  margin:.2rem 0;
+  font-weight:800;
+}
+.timerBar{
+  height:10px; border-radius:999px; background:color-mix(in oklab, var(--border) 80%, transparent);
+  overflow:hidden;
+}
+#timerFill{
+  height:100%;
+  width:0%;
+  background: var(--timer-ok);
+  transition: width .1s linear, background-color .15s ease;
+}
+.timer-alert{ color: var(--timer-warn) !important; }
+.timer-pulse{ animation: timerPulse .9s ease-in-out infinite; }
+@keyframes timerPulse{
+  0%{ transform: translateZ(0) scale(1); }
+  50%{ transform: translateZ(0) scale(1.03); }
+  100%{ transform: translateZ(0) scale(1); }
+}
 
 .enunciado{ font-weight:800; margin:.2rem 0 .2rem; }
 .hueco{
@@ -100,6 +132,7 @@ select{
 .estado{ margin-top:.6rem }
 .muted{ color:var(--muted) }
 
+/* ===== Ayuda / modal ===== */
 .fixed-top-right{position:fixed; right:12px; top:12px; z-index:10}
 .btn-fab{
   width:44px;height:44px;border-radius:50%;
@@ -117,6 +150,7 @@ select{
 .mt0{ margin-top:0 }
 .modal-actions{ display:flex; gap:.6rem; justify-content:flex-end; }
 
+/* ===== Skip link / footer ===== */
 .skip{ position:absolute; left:-9999px; top:auto }
 .skip:focus{ left:12px; top:12px; background:var(--btn-primary-bg); color:var(--btn-primary-fg);
   padding:8px 10px; border-radius:8px; z-index:1000 }
@@ -124,3 +158,9 @@ select{
 .mini-credit{ margin-top:.6rem; padding:.4rem 0; border-top:1px solid var(--border); font-size:.85em; line-height:1.35; color:var(--muted);}
 .mini-credit a{ color:inherit; text-decoration:underline; font-weight:700 }
 .mini-label{ font-weight:900; color:var(--fg) }
+
+/* ===== Aire extra en móvil ===== */
+@media (max-width: 600px){
+  .enunciado{ margin-bottom: 1rem; }
+  .opciones{ gap: .9rem; }
+}

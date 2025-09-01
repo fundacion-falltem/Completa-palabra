@@ -1,11 +1,11 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const VERSION = 'v1.1.0 (JSON externo + fallback)';
+  const VERSION = 'v1.2.1 (timer + JSON externo + fallback)';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
-  // ===== Banco interno (fallback de seguridad) =====
+  // ===== Banco interno (fallback) =====
   const BANK_FALLBACK = {
     facil: [
       { hueco: 'C__A', opciones: ['CAJA', 'CASA', 'CENA', 'CIMA'], ok: 1, pista:'Hogar' },
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { hueco: 'S__A', opciones: ['SOPA','SEÑA','SALA','SOGA'], ok: 0, pista:'Comida' },
       { hueco: 'M_NO', opciones: ['MANO','MONO','MINO','MENO'], ok: 0 },
       { hueco: 'R_TA', opciones: ['RUTA','RATA','ROTA','RETA'], ok: 1, pista:'Animal' },
-      { hueco: 'L_BO', opciones: ['LADO','LAGO','LOBO','LEGO'], ok: 2, pista:'Animal' },
+      { hueco: 'L_BO', opciones: ['LADO','LAGO','LOBO','LEGO'], ok: 2, pista:'Animal' }
     ],
     media: [
       { hueco: 'CA__TA', opciones: ['CARTA','CANCHA','CASITA','CABINA'], ok:0, pista:'Se envía' },
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { hueco: 'F_O__O', opciones: ['FLORNO','FOSFORO','FONDO','FOSFATO'], ok:1, pista:'Enciende' },
       { hueco: 'A__ENA', opciones: ['ARENA','ANTENA','AZUCENA','ARETES'], ok:0, pista:'Playa' },
       { hueco: 'LI__RO', opciones: ['LITRO','LIBARO','LIBERO','LIBRO'], ok:3, pista:'Se lee' },
-      { hueco: 'CA__ERO', opciones: ['CARRERO','CANTERO','CAMARERO','CAJERO'], ok:3, pista:'Oficio' },
+      { hueco: 'CA__ERO', opciones: ['CARRERO','CANTERO','CAMARERO','CAJERO'], ok:3, pista:'Oficio' }
     ],
     avanzada: [
       { hueco: '__TERIOR', opciones: ['ANTERIOR','ENTERIOR','INTERIOR','OTERIOR'], ok:2 },
@@ -29,11 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
       { hueco: '_EM______IÓN', opciones: ['DEMANIPIÓN','DEMERITIÓN','DEFINICIÓN','DEMOLICIÓN'], ok:2 },
       { hueco: 'CO__NICACIÓN', opciones: ['COMUNICACIÓN','CONUNICACIÓN','COFUNICACIÓN','COTUNICACIÓN'], ok:0 },
       { hueco: 'RE__RCIMIENTO', opciones: ['RECURCIMIENTO','REINFORCIMIENTO','RECRECIMIENTO','REAPRENDIMIENTO'], ok:1, pista:'fortalecimiento' },
-      { hueco: 'SI__ÓN', opciones: ['SIALÓN','SITUACIÓN','SIMIÓN','SIRCIÓN'], ok:1 },
+      { hueco: 'SI__ÓN', opciones: ['SIALÓN','SITUACIÓN','SIMIÓN','SIRCIÓN'], ok:1 }
     ]
   };
 
-  // ===== Banco activo (externo con fallback) =====
+  // ===== Banco activo (JSON externo con fallback) =====
   let BANK = BANK_FALLBACK;
   let catalogoListo = false;
 
@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
     validarBanco(data);
     return data;
   }
-
   function validarBanco(data){
     const niveles = ['facil','media','avanzada'];
     for (const n of niveles){
@@ -59,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
-
   async function initBanco(){
     if (catalogoListo) return;
     const params = new URLSearchParams(location.search);
@@ -82,6 +80,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let ronda = 0, aciertos = 0;
   let itemActual = null;
 
+  // Timer
+  let timerId = null;
+  let timeLeft = 0; // ms
+  let timeMax  = 0; // ms
+
   // ===== Refs
   const difSel = document.getElementById('dificultad');
   const ronSel = document.getElementById('rondas');
@@ -98,6 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const pbFill   = document.getElementById('pbFill');
   const progTxt  = document.getElementById('progTxt');
   const aciTxt   = document.getElementById('aciertos');
+
+  // Timer UI
+  const timerText = document.getElementById('timerText');
+  const timerFill = document.getElementById('timerFill');
+  const timerBar  = document.querySelector('.timerBar');
 
   // Tema / modal
   const themeBtn   = document.getElementById('themeToggle');
@@ -117,6 +125,63 @@ document.addEventListener('DOMContentLoaded', () => {
     pbFill.style.width = pct + '%';
   }
 
+  // ===== Timer helpers
+  function tiempoPorDificultad(){
+    if (nivel === 'facil') return 14000;   // 14s
+    if (nivel === 'media') return 10000;   // 10s
+    return 8000;                           // 8s (avanzada)
+  }
+  function showTimer(){
+    if (timerText){ timerText.style.display = ''; timerText.setAttribute('aria-hidden','false'); }
+    if (timerBar){ timerBar.style.display = ''; timerBar.setAttribute('aria-hidden','true'); }
+  }
+  function hideTimer(){
+    if (timerText){ timerText.style.display = 'none'; timerText.setAttribute('aria-hidden','true'); }
+    if (timerBar){ timerBar.style.display = 'none'; timerBar.setAttribute('aria-hidden','true'); }
+  }
+  function stopTimer(){
+    if (timerId){ clearInterval(timerId); timerId = null; }
+  }
+  function startTimer(ms){
+    stopTimer();
+    timeMax = ms;
+    timeLeft = ms;
+    updateTimerUI();
+
+    timerId = setInterval(()=>{
+      timeLeft -= 100;
+      if (timeLeft <= 0){
+        timeLeft = 0;
+        updateTimerUI();
+        stopTimer();
+        tiempoAgotado();
+      } else {
+        updateTimerUI();
+      }
+    }, 100);
+  }
+  function updateTimerUI(){
+    // texto
+    if (timerText){
+      const s = Math.ceil(timeLeft / 1000);
+      setTxt(timerText, s > 0 ? `Tiempo: ${s} s` : 'Tiempo: 0 s');
+      const alerta = timeLeft <= 3000 && timeLeft > 0;
+      timerText.classList.toggle('timer-alert', alerta);
+      timerText.classList.toggle('timer-pulse', alerta);
+      if (alerta && navigator.vibrate) navigator.vibrate(40);
+    }
+    // barra
+    if (timerFill && timeMax > 0){
+      const pct = Math.max(0, Math.min(100, Math.round((timeLeft / timeMax) * 100)));
+      timerFill.style.width = pct + '%';
+      const styles = getComputedStyle(document.documentElement);
+      timerFill.style.backgroundColor = (timeLeft <= 3000 && timeLeft > 0)
+        ? styles.getPropertyValue('--timer-warn')
+        : styles.getPropertyValue('--timer-ok');
+    }
+  }
+
+  // ===== Rondas
   function nuevaRonda(){
     if (ronda >= rondasTotales){ finJuego(); return; }
 
@@ -141,6 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
     feedbackEl.className = 'feedback muted';
 
     actualizarUI();
+
+    // Timer por pregunta
+    showTimer();
+    startTimer(tiempoPorDificultad());
   }
 
   function renderOpciones(lista, idxCorrecta){
@@ -171,6 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function elegir(idxElegida, idxCorrecta, btn){
+    stopTimer();
+
     bloquearOpciones();
     const ok = (idxElegida === idxCorrecta);
     btn.classList.add(ok ? 'ok' : 'bad');
@@ -197,6 +268,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function tiempoAgotado(){
+    bloquearOpciones();
+    const correctoBtn = opcionesEl.children[itemActual.idxCorrecta];
+    if (correctoBtn) correctoBtn.classList.add('ok');
+    setTxt(feedbackEl, `⏰ Tiempo agotado. La respuesta correcta era: ${itemActual.correcta}.`);
+    feedbackEl.className = 'feedback bad';
+
+    ronda++;
+    if (ronda >= rondasTotales){
+      setTimeout(finJuego, 650);
+    } else {
+      setTimeout(nuevaRonda, 800);
+    }
+  }
+
   function finJuego(){
     opcionesEl.innerHTML = '';
     setTxt(huecoEl, '');
@@ -206,12 +292,16 @@ document.addEventListener('DOMContentLoaded', () => {
     btnReiniciar.hidden = false;
     btnComenzar.hidden = true;
     actualizarUI();
+
+    // limpiar timer
+    hideTimer();
+    setTxt(timerText, '');
+    if (timerFill) timerFill.style.width = '0%';
   }
 
   // ===== Eventos
   btnComenzar.addEventListener('click', async ()=>{
-    await initBanco(); // asegura carga del JSON externo o fallback
-
+    await initBanco(); // asegura JSON externo
     nivel = difSel.value;
     rondasTotales = Number(ronSel.value);
 
@@ -224,12 +314,19 @@ document.addEventListener('DOMContentLoaded', () => {
     btnComenzar.hidden = true;
     btnReiniciar.hidden = true;
 
+    // reset timer UI
+    showTimer();
+    setTxt(timerText, '');
+    if (timerFill) timerFill.style.width = '0%';
+
     nuevaRonda();
   });
 
   btnReiniciar.addEventListener('click', ()=>{
+    stopTimer();
     btnComenzar.hidden = false;
     btnReiniciar.hidden = true;
+
     setTxt(enunciado, 'Presioná “Comenzar” para iniciar.');
     setTxt(huecoEl, '');
     setTxt(pistaEl, ''); pistaEl.hidden = true;
@@ -237,6 +334,10 @@ document.addEventListener('DOMContentLoaded', () => {
     opcionesEl.innerHTML = '';
     ronda = 0; aciertos = 0;
     actualizarUI();
+
+    hideTimer();
+    setTxt(timerText, '');
+    if (timerFill) timerFill.style.width = '0%';
   });
 
   // Restaurar prefs
@@ -286,4 +387,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Init
   actualizarUI();
+  hideTimer(); // oculto timer hasta que arranque
 });
