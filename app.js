@@ -1,7 +1,7 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const VERSION = 'v1.3.0 (sin repeticiones por partida + timer + JSON externo)';
+  const VERSION = 'v1.3.1 (no repeticiones + timer + pista automática + JSON externo)';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let ronda = 0, aciertos = 0;
   let itemActual = null;
 
-  // Pool sin reposición (para no repetir en la partida)
+  // Pool sin reposición (no repite ítems en la partida)
   let poolActual = [];
 
   // Timer
@@ -201,16 +201,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const indices = [0,1,2,3]; barajar(indices);
     const opcionesOrdenadas = indices.map(i => base.opciones[i]);
     const idxCorrecta = indices.indexOf(base.ok);
+    const palabraCorrecta = base.opciones[base.ok];
+
+    // ---- PISTA: usar la del JSON o generar una por defecto ----
+    let pistaTexto = base.pista;
+    if (!pistaTexto && typeof palabraCorrecta === 'string' && palabraCorrecta.length > 0) {
+      pistaTexto = `Empieza con “${palabraCorrecta[0]}” y tiene ${palabraCorrecta.length} letras.`;
+    }
+    if (pistaTexto) {
+      pistaEl.hidden = false;
+      pistaEl.textContent = `Pista: ${pistaTexto}`;
+    } else {
+      pistaEl.hidden = true;
+      pistaEl.textContent = '';
+    }
+    // -----------------------------------------------------------
 
     // Render
     setTxt(enunciado, 'Completá la palabra:');
     setTxt(huecoEl, base.hueco);
-    if (base.pista){ pistaEl.hidden = false; setTxt(pistaEl, `Pista: ${base.pista}`); }
-    else { pistaEl.hidden = true; setTxt(pistaEl, ''); }
+    renderOpciones(opcionesOrdenadas, idxCorrecta, palabraCorrecta);
 
-    renderOpciones(opcionesOrdenadas, idxCorrecta, base.opciones[base.ok]);
-
-    itemActual = { correcta: base.opciones[base.ok], idxCorrecta };
+    itemActual = { correcta: palabraCorrecta, idxCorrecta };
     setTxt(feedbackEl, '');
     feedbackEl.className = 'feedback muted';
 
