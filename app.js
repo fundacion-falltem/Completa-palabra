@@ -1,7 +1,7 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const VERSION = 'v1.2.1 (timer + JSON externo + fallback)';
+  const VERSION = 'v1.3.0 (sin repeticiones por partida + timer + JSON externo)';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
@@ -79,6 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let rondasTotales = 8;
   let ronda = 0, aciertos = 0;
   let itemActual = null;
+
+  // Pool sin reposición (para no repetir en la partida)
+  let poolActual = [];
 
   // Timer
   let timerId = null;
@@ -185,8 +188,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function nuevaRonda(){
     if (ronda >= rondasTotales){ finJuego(); return; }
 
-    const pool = BANK[nivel];
-    const base = pick(pool);
+    // Si se vació el pool y aún faltan rondas, reinyectamos el banco del nivel
+    if (poolActual.length === 0) {
+      poolActual = [...BANK[nivel]];
+    }
+
+    // Tomamos un ítem aleatorio del pool y lo removemos (sin reposición)
+    const idx = Math.floor(Math.random() * poolActual.length);
+    const base = poolActual.splice(idx, 1)[0];
 
     // barajar opciones manteniendo correcta
     const indices = [0,1,2,3]; barajar(indices);
@@ -279,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ronda >= rondasTotales){
       setTimeout(finJuego, 650);
     } else {
-      setTimeout(nuevaRonda, 800);
+      setTimeout(nuevaRonda, 550);
     }
   }
 
@@ -310,9 +319,13 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('comp_rondas', String(rondasTotales));
     }catch{}
 
+    // Reinicio de estado de partida
     ronda = 0; aciertos = 0;
     btnComenzar.hidden = true;
     btnReiniciar.hidden = true;
+
+    // Armar pool sin reposición para este nivel
+    poolActual = [...BANK[nivel]];
 
     // reset timer UI
     showTimer();
@@ -333,8 +346,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setTxt(feedbackEl, ''); feedbackEl.className = 'feedback muted';
     opcionesEl.innerHTML = '';
     ronda = 0; aciertos = 0;
-    actualizarUI();
 
+    // vaciar poolActual (se regenerará al comenzar)
+    poolActual = [];
+
+    actualizarUI();
     hideTimer();
     setTxt(timerText, '');
     if (timerFill) timerFill.style.width = '0%';
