@@ -1,49 +1,75 @@
-/* ===== Tema base accesible ===== */
+/* ======================================================
+   FALLTEM — Completa la palabra (CSS adaptado)
+   - Mantiene tus clases/estructura
+   - Paleta y tipografía de FALLTEM
+   - Claro por defecto, dark opcional con [data-theme="dark"]
+   ====================================================== */
+
+/* ===== Tema base accesible (FALLTEM) ===== */
 :root{
   color-scheme: light dark;
+
   --fs-base: clamp(18px, 1.2vw + 14px, 22px);
-  --space: clamp(12px, 1vw + 8px, 18px);
+  --space:    clamp(12px, 1vw + 8px, 18px);
 
-  --font: "Nunito", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  /* Tipografía */
+  --font: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
-  /* Dark por defecto */
-  --bg:#0b0b0b; --fg:#f5f5f5; --muted:#cfcfcf;
-  --card:#171717; --border:#2a2a2a;
-  --focus:#0ea5e9; --ok:#16a34a; --bad:#dc2626;
+  /* --- Paleta FALLTEM (modo CLARO por defecto) --- */
+  --bg:#f8fbf4;            /* fondo */
+  --fg:#1b1b1b;            /* texto */
+  --muted:#50380b;         /* texto secundario */
+  --card:#ffffff;          /* superficies */
+  --border:#e5e7eb;        /* bordes suaves */
 
-  --btn-primary-bg:#22c55e; --btn-primary-fg:#0a0a0a;
-  --btn-sec-bg:#0ea5e9;     --btn-sec-fg:#0a0a0a;
+  /* Marca */
+  --focus:#5fcbe0;         /* celeste (foco/acción secundaria) */
+  --ok:#99cd68;            /* verde marca */
+  --bad:#ef4444;           /* error (conservamos rojo accesible) */
+
+  /* Botones */
+  --btn-primary-bg:#99cd68;  --btn-primary-fg:#08340f;
+  --btn-sec-bg:#5fcbe0;      --btn-sec-fg:#072a32;
 
   /* Timer */
-  --timer-ok:#22c55e;
-  --timer-warn:#ef4444;
+  --timer-ok:  var(--ok);
+  --timer-warn:#e8b75b;      /* amarillo de marca para “quedan pocos segundos” */
 }
 
-[data-theme="light"]{
-  --bg:#ffffff; --fg:#111111; --muted:#374151;
-  --card:#ffffff; --border:#e5e7eb;
-  --focus:#2563eb; --ok:#15803d; --bad:#b91c1c;
+/* ===== Dark opcional ===== */
+[data-theme="dark"]{
+  --bg:#0b0b0b; --fg:#f5f5f5; --muted:#cfcfcf;
+  --card:#171717; --border:#2a2a2a;
 
-  --btn-primary-bg:#22c55e; --btn-primary-fg:#0a0a0a;
-  --btn-sec-bg:#0284c7;     --btn-sec-fg:#ffffff;
+  --focus:#5fcbe0;
+  --ok:#99cd68; --bad:#ef4444;
 
-  --timer-ok:#16a34a;
-  --timer-warn:#dc2626;
+  --btn-primary-bg:#99cd68; --btn-primary-fg:#0a0a0a;
+  --btn-sec-bg:#5fcbe0;     --btn-sec-fg:#0a0a0a;
+
+  --timer-ok:  var(--ok);
+  --timer-warn:#e8b75b;
 }
 
+/* ===== Base ===== */
 *{box-sizing:border-box}
 html,body{height:100%}
 html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
 body{
   margin:0; background:var(--bg); color:var(--fg);
   font-family: var(--font);
-  font-size:var(--fs-base); line-height:1.6;
+  font-size:var(--fs-base);
+  line-height:1.7;                 /* más aire */
+  letter-spacing:.15px;
   padding-bottom: calc(env(safe-area-inset-bottom, 0) + var(--space));
   -webkit-tap-highlight-color: transparent;
 }
 
 .wrap{ max-width: 900px; width: min(900px, calc(100% - 2*var(--space))); margin: 0 auto; padding: var(--space); }
-.header h1{ font-size: clamp(1.8rem, 2vw + 1rem, 2.4rem); margin:.5rem 0; font-weight: 800; }
+.header h1{
+  font-size: clamp(1.8rem, 2vw + 1rem, 2.4rem);
+  margin:.5rem 0; font-weight: 900; letter-spacing:.2px;
+}
 .intro{ margin:0 0 var(--space); }
 
 .card{
@@ -52,39 +78,53 @@ body{
   box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
 
-.controles{ display:grid; gap:1rem; grid-template-columns: 1fr; }
-.control label{ font-weight:700; }
+/* ===== Controles ===== */
+.controles{
+  display:grid; gap:1.1rem; grid-template-columns: 1fr;
+  margin-bottom: calc(var(--space) * 1.1);  /* +aire antes del juego */
+}
+.control label{ font-weight:800; }
+
+/* Selects con estilo */
 select{
   appearance:none; background:var(--card); color:var(--fg); border:1px solid var(--border);
   border-radius:.8rem; padding:.7rem 1rem; width:100%;
   background-image:url("data:image/svg+xml;utf8,<svg fill='currentColor' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 5 4.5-5z'/></svg>");
   background-repeat:no-repeat; background-position:right 1rem center; background-size:1rem; padding-right:2.5rem;
 }
-.buttons{ display:flex; gap:.6rem; flex-wrap:wrap; }
 
-.btn{ border:0; border-radius:1rem; cursor:pointer; font-weight:800; padding:1rem 1.2rem; min-height:48px; }
-.btn.principal{ background:var(--btn-primary-bg); color:var(--btn-primary-fg); }
-.btn.secundario{ background:var(--btn-sec-bg);   color:var(--btn-sec-fg); }
+/* Botonera */
+.buttons{
+  display:flex; gap:.8rem; flex-wrap:wrap;
+  justify-content:center;                           /* centrados por jerarquía */
+  margin-top: .2rem;
+}
+.btn{
+  border:0; border-radius:1rem; cursor:pointer; font-weight:800;
+  padding:1rem 1.2rem; min-height:50px; font-size:1.05rem;
+  transition: transform .08s ease, filter .15s ease, box-shadow .15s ease,
+              background-color .15s ease, color .15s ease;
+}
+.btn:hover{ transform:translateY(-1px); filter:brightness(1.04) }
 .btn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+.btn.principal{  background:var(--btn-primary-bg); color:var(--btn-primary-fg); }
+.btn.secundario{ background:var(--btn-sec-bg);     color:var(--btn-sec-fg); }
 
 /* ===== Juego ===== */
-.juego{ display:grid; gap: .8rem; }
+.juego{ display:grid; gap: .9rem; }
 
+/* Progreso */
 .progresoBar{height:10px; background:var(--border); border-radius:999px; overflow:hidden}
 #pbFill{height:100%; width:0%; background:var(--btn-primary-bg); transition:width .2s linear}
 
 /* Timer */
-.timer-text{
-  margin:.2rem 0;
-  font-weight:800;
-}
+.timer-text{ margin:.2rem 0; font-weight:800; }
 .timerBar{
   height:10px; border-radius:999px; background:color-mix(in oklab, var(--border) 80%, transparent);
   overflow:hidden;
 }
 #timerFill{
-  height:100%;
-  width:0%;
+  height:100%; width:0%;
   background: var(--timer-ok);
   transition: width .1s linear, background-color .15s ease;
 }
@@ -96,7 +136,8 @@ select{
   100%{ transform: translateZ(0) scale(1); }
 }
 
-.enunciado{ font-weight:800; margin:.2rem 0 .2rem; }
+/* Enunciado y hueco */
+.enunciado{ font-weight:800; margin:.2rem 0 .6rem; }
 .hueco{
   font-weight:900; letter-spacing:.04em;
   font-size: clamp(1.6rem, 1.2vw + 1.2rem, 2rem);
@@ -105,7 +146,10 @@ select{
   text-align:center;
 }
 
-.opciones{ display:grid; gap:.8rem; grid-template-columns: 1fr; margin-top:.2rem; }
+/* Opciones */
+.opciones{
+  display:grid; gap:.9rem; grid-template-columns: 1fr; margin-top:.2rem;
+}
 @media (min-width: 680px){ .opciones{ grid-template-columns: 1fr 1fr; } }
 
 .opcion-btn{
@@ -114,22 +158,32 @@ select{
   padding:1rem 1.1rem; font-weight:800;
   font-size: clamp(1.05rem, 0.6vw + 1rem, 1.25rem);
   cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.08);
-  transition: transform .15s ease, filter .15s ease, border-color .15s ease;
+  transition: transform .15s ease, filter .15s ease, border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 .opcion-btn strong{ margin-right:.4rem }
 .opcion-btn:hover, .opcion-btn:focus-visible{
   filter:brightness(1.06); transform:translateY(-1px);
   outline:3px solid var(--focus); outline-offset:2px;
 }
-.opcion-btn.ok{ border-color:var(--ok); box-shadow:0 0 0 3px color-mix(in oklab, var(--ok) 35%, transparent); background: color-mix(in oklab, var(--ok) 14%, var(--card)); }
-.opcion-btn.bad{ border-color:var(--bad); box-shadow:0 0 0 3px color-mix(in oklab, var(--bad) 35%, transparent); background: color-mix(in oklab, var(--bad) 10%, var(--card)); }
 
-.pista{ margin:.4rem 0 0; }
+/* Estados */
+.opcion-btn.ok{
+  border-color:var(--ok);
+  box-shadow:0 0 0 3px color-mix(in oklab, var(--ok) 35%, transparent);
+  background: color-mix(in oklab, var(--ok) 14%, var(--card));
+}
+.opcion-btn.bad{
+  border-color:var(--bad);
+  box-shadow:0 0 0 3px color-mix(in oklab, var(--bad) 35%, transparent);
+  background: color-mix(in oklab, var(--bad) 10%, var(--card));
+}
+
+.pista{ margin:.6rem 0 0; }
 .feedback{ margin:.6rem 0 0; font-weight:800; }
 .feedback.ok{ color:var(--ok) }
 .feedback.bad{ color:var(--bad) }
 
-.estado{ margin-top:.6rem }
+.estado{ margin-top:1rem }
 .muted{ color:var(--muted) }
 
 /* ===== Ayuda / modal ===== */
@@ -145,22 +199,41 @@ select{
 
 .modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:20}
 .modal[aria-hidden="false"]{display:block}
-.modal-card{ max-width:min(820px, 100% - 2*var(--space)); margin:6vh auto; background:var(--card); color:var(--fg);
-  padding:var(--space); border-radius:1rem; border:1px solid var(--border); }
+.modal-card{
+  max-width:min(820px, 100% - 2*var(--space));
+  margin:6vh auto; background:var(--card); color:var(--fg);
+  padding:var(--space); border-radius:1rem; border:1px solid var(--border);
+}
 .mt0{ margin-top:0 }
 .modal-actions{ display:flex; gap:.6rem; justify-content:flex-end; }
 
 /* ===== Skip link / footer ===== */
 .skip{ position:absolute; left:-9999px; top:auto }
-.skip:focus{ left:12px; top:12px; background:var(--btn-primary-bg); color:var(--btn-primary-fg);
-  padding:8px 10px; border-radius:8px; z-index:1000 }
+.skip:focus{
+  left:12px; top:12px; background:var(--btn-primary-bg); color:var(--btn-primary-fg);
+  padding:8px 10px; border-radius:8px; z-index:1000
+}
 
-.mini-credit{ margin-top:.6rem; padding:.4rem 0; border-top:1px solid var(--border); font-size:.85em; line-height:1.35; color:var(--muted);}
+.mini-credit{
+  margin-top:.8rem; padding:.6rem 0; border-top:1px solid var(--border);
+  font-size:.85em; line-height:1.35; color:var(--muted);
+}
 .mini-credit a{ color:inherit; text-decoration:underline; font-weight:700 }
 .mini-label{ font-weight:900; color:var(--fg) }
 
 /* ===== Aire extra en móvil ===== */
 @media (max-width: 600px){
   .enunciado{ margin-bottom: 1rem; }
-  .opciones{ gap: .9rem; }
+  .opciones{ gap: 1rem; }
+}
+
+/* ===== Preferencias de usuario ===== */
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important }
+}
+
+/* ===== Fallback color-mix ===== */
+@supports not (color: color-mix(in oklab, red 50%, white)){
+  .opcion-btn.ok{ background:#eef8ea; }
+  .opcion-btn.bad{ background:#feecec; }
 }

@@ -3,21 +3,37 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="description" content="Juego cognitivo accesible para completar palabras: lenguaje y memoria semántica."/>
-  <meta name="theme-color" content="#0b0b0b"/>
-  <meta name="color-scheme" content="dark light"/>
+
+  <title>Completa la palabra — Juegos Cognitivos FALLTEM</title>
+  <meta name="description" content="Juego cognitivo accesible para completar palabras: lenguaje y memoria semántica." />
+
+  <!-- Arrancamos en claro, con soporte dark -->
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fbf4">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#0b0b0b">
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
 
-  <!-- CSP estricta: sin inline JS/CSS -->
+  <!-- CSP estricta (+ Google Fonts). Si usás fuentes locales, quitá *.google* y dejá 'self' -->
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self';
-                 img-src 'self' data:; connect-src 'self'; object-src 'none';
-                 base-uri 'none'; form-action 'none'">
+        content="default-src 'self';
+                 script-src 'self';
+                 style-src 'self' https://fonts.googleapis.com;
+                 font-src 'self' https://fonts.gstatic.com data:;
+                 img-src 'self' data:;
+                 connect-src 'self';
+                 object-src 'none';
+                 base-uri 'none';
+                 frame-ancestors 'none';
+                 form-action 'none'">
 
-  <title>Completa la palabra — Juegos Cognitivos</title>
+  <!-- Montserrat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="./styles.css?v=1.2.1">
 </head>
-<body>
+<body data-theme="light">
   <a href="#juego" class="skip">Saltar directamente al juego</a>
 
   <!-- Botón de ayuda (FAB) -->
@@ -105,7 +121,7 @@
 
     <!-- Estado -->
     <section class="card estado" role="status" aria-live="polite" aria-atomic="true">
-      <p>Progreso: <strong id="progTxt">0/0</strong> · Aciertos: <strong id="aciertos">0</strong> · Versión: <strong id="versionLabel"></strong></p>
+      <p>Progreso: <strong id="progTxt">0/0</strong> · Aciertos: <strong id="aciertos">0</strong> </p>
     </section>
 
     <footer class="mini-credit" role="contentinfo" aria-label="Créditos y aviso">

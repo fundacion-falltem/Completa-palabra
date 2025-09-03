@@ -1,7 +1,7 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const VERSION = 'v1.3.1 (no repeticiones + timer + pista automática + JSON externo)';
+  const VERSION = 'v1.4.0 (FALLTEM theme + default light + UX focus)';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let ronda = 0, aciertos = 0;
   let itemActual = null;
 
-  // Pool sin reposición (no repite ítems en la partida)
+  // Pool sin reposición
   let poolActual = [];
 
   // Timer
@@ -188,22 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function nuevaRonda(){
     if (ronda >= rondasTotales){ finJuego(); return; }
 
-    // Si se vació el pool y aún faltan rondas, reinyectamos el banco del nivel
     if (poolActual.length === 0) {
       poolActual = [...BANK[nivel]];
     }
 
-    // Tomamos un ítem aleatorio del pool y lo removemos (sin reposición)
     const idx = Math.floor(Math.random() * poolActual.length);
     const base = poolActual.splice(idx, 1)[0];
 
-    // barajar opciones manteniendo correcta
     const indices = [0,1,2,3]; barajar(indices);
     const opcionesOrdenadas = indices.map(i => base.opciones[i]);
     const idxCorrecta = indices.indexOf(base.ok);
     const palabraCorrecta = base.opciones[base.ok];
 
-    // ---- PISTA: usar la del JSON o generar una por defecto ----
+    // ---- PISTA ----
     let pistaTexto = base.pista;
     if (!pistaTexto && typeof palabraCorrecta === 'string' && palabraCorrecta.length > 0) {
       pistaTexto = `Empieza con “${palabraCorrecta[0]}” y tiene ${palabraCorrecta.length} letras.`;
@@ -215,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
       pistaEl.hidden = true;
       pistaEl.textContent = '';
     }
-    // -----------------------------------------------------------
 
     // Render
     setTxt(enunciado, 'Completá la palabra:');
@@ -247,7 +243,16 @@ document.addEventListener('DOMContentLoaded', () => {
       opcionesEl.appendChild(b);
     });
 
-    // Atajos A–D
+    // Foco en la 1ª opción para flujo más ágil + scroll suave al tablero
+    const firstBtn = opcionesEl.querySelector('button');
+    if (firstBtn) {
+      requestAnimationFrame(() => {
+        firstBtn.focus({ preventScroll: true });
+        document.getElementById('juego')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    // Atajos A–D (una sola ronda)
     const onKey = (e)=>{
       const k = e.key.toUpperCase();
       const pos = letras.indexOf(k);
@@ -320,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (timerFill) timerFill.style.width = '0%';
   }
 
-  // ===== Eventos
+  // ===== Eventos =====
   btnComenzar.addEventListener('click', async ()=>{
     await initBanco(); // asegura JSON externo
     nivel = difSel.value;
@@ -331,12 +336,11 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('comp_rondas', String(rondasTotales));
     }catch{}
 
-    // Reinicio de estado de partida
+    // Reinicio de estado
     ronda = 0; aciertos = 0;
     btnComenzar.hidden = true;
     btnReiniciar.hidden = true;
 
-    // Armar pool sin reposición para este nivel
     poolActual = [...BANK[nivel]];
 
     // reset timer UI
@@ -358,8 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setTxt(feedbackEl, ''); feedbackEl.className = 'feedback muted';
     opcionesEl.innerHTML = '';
     ronda = 0; aciertos = 0;
-
-    // vaciar poolActual (se regenerará al comenzar)
     poolActual = [];
 
     actualizarUI();
@@ -368,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (timerFill) timerFill.style.width = '0%';
   });
 
-  // Restaurar prefs
+  // Restaurar prefs de dificultad/rondas
   try{
     const d = localStorage.getItem('comp_dif');
     if (d && ['facil','media','avanzada'].includes(d)) difSel.value = d;
@@ -377,35 +379,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (r && ['6','8','10'].includes(r)) ronSel.value = r;
   }catch{}
 
-  // ===== Tema
+  // ===== Tema (default LIGHT, dark como opción) =====
+  function labelFor(mode){
+    // Texto describe la acción a realizar
+    return mode === 'dark' ? 'Usar modo claro' : 'Usar modo oscuro';
+  }
   function applyTheme(mode){
-    const m=(mode==='light'||mode==='dark')?mode:'dark';
-    document.documentElement.setAttribute('data-theme', m);
+    const m = (mode === 'dark') ? 'dark' : 'light'; // default light
+    // aplicamos el atributo en <body> para que afecte todo el contenido
+    document.body.setAttribute('data-theme', m);
+
     if (themeBtn){
-      const isDark=(m==='dark');
-      themeBtn.textContent = isDark ? 'Cambiar tema' : 'Cambiar tema';
-      themeBtn.setAttribute('aria-pressed', String(isDark));
+      themeBtn.textContent = labelFor(m);
+      themeBtn.setAttribute('aria-pressed', String(m === 'dark'));
     }
     const metaTheme = document.querySelector('meta[name="theme-color"]');
-    if (metaTheme) metaTheme.setAttribute('content', m==='dark' ? '#0b0b0b' : '#ffffff');
+    if (metaTheme) metaTheme.setAttribute('content', m === 'dark' ? '#0b0b0b' : '#f8fbf4');
   }
   (function initTheme(){
-    let mode='dark';
+    // DEFAULT: light, salvo preferencia guardada
+    let mode = 'light';
     try{
-      const stored=localStorage.getItem('theme');
-      if(stored==='light'||stored==='dark') mode=stored;
-      else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) mode='light';
+      const stored = localStorage.getItem('theme');
+      if (stored === 'light' || stored === 'dark') mode = stored;
     }catch{}
     applyTheme(mode);
   })();
   themeBtn.addEventListener('click', ()=>{
-    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const current = document.body.getAttribute('data-theme') || 'light';
     const next = current === 'dark' ? 'light' : 'dark';
     try { localStorage.setItem('theme', next); } catch {}
     applyTheme(next);
   });
 
-  // ===== Modal ayuda
+  // ===== Modal ayuda =====
   function openAbout(){ aboutModal?.setAttribute('aria-hidden','false'); aboutClose?.focus(); }
   function closeAbout(){ aboutModal?.setAttribute('aria-hidden','true'); }
   aboutBtn?.addEventListener('click', openAbout);
