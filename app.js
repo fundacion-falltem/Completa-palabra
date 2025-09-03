@@ -1,7 +1,7 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const VERSION = 'v1.4.0 (FALLTEM theme + default light + UX focus)';
+  const VERSION = 'v1.4.1 (fix key repeat + FALLTEM theme)';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
@@ -88,6 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let timeLeft = 0; // ms
   let timeMax  = 0; // ms
 
+  // === NUEVO: guard anti key-repeat ===
+  let rondaActiva = false;
+  let keyGuardUntil = 0;
+
   // ===== Refs
   const difSel = document.getElementById('dificultad');
   const ronSel = document.getElementById('rondas');
@@ -118,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== Utils
   const setTxt = (el, t)=>{ if(el) el.textContent = String(t); };
-  const pick = (arr)=> arr[Math.floor(Math.random()*arr.length)];
   const barajar = (arr)=>{ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; };
 
   function actualizarUI(){
@@ -224,6 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     actualizarUI();
 
+    // === NUEVO: habilitar ronda y dar margen anti repetición de tecla ===
+    rondaActiva = true;
+    keyGuardUntil = performance.now() + 150;
+
     // Timer por pregunta
     showTimer();
     startTimer(tiempoPorDificultad());
@@ -243,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
       opcionesEl.appendChild(b);
     });
 
-    // Foco en la 1ª opción para flujo más ágil + scroll suave al tablero
+    // Foco en la 1ª opción + scroll suave
     const firstBtn = opcionesEl.querySelector('button');
     if (firstBtn) {
       requestAnimationFrame(() => {
@@ -252,13 +259,14 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Atajos A–D (una sola ronda)
+    // === NUEVO: atajos A–D en keyup + guard anti repetición ===
     const onKey = (e)=>{
-      const k = e.key.toUpperCase();
-      const pos = letras.indexOf(k);
+      if (!rondaActiva || performance.now() < keyGuardUntil) return;
+      const k = e.key?.toUpperCase();
+      const pos = ['A','B','C','D'].indexOf(k);
       if (pos >= 0) opcionesEl.children[pos]?.click();
     };
-    document.addEventListener('keydown', onKey, {once:true});
+    document.addEventListener('keyup', onKey, { once:true });
   }
 
   function bloquearOpciones(){
@@ -267,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function elegir(idxElegida, idxCorrecta, btn){
     stopTimer();
+    rondaActiva = false; // NUEVO: desactiva atajos
 
     bloquearOpciones();
     const ok = (idxElegida === idxCorrecta);
@@ -296,6 +305,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function tiempoAgotado(){
     bloquearOpciones();
+    rondaActiva = false; // NUEVO: desactiva atajos
+
     const correctoBtn = opcionesEl.children[itemActual.idxCorrecta];
     if (correctoBtn) correctoBtn.classList.add('ok');
     setTxt(feedbackEl, `⏰ Tiempo agotado. La respuesta correcta era: ${itemActual.correcta}.`);
@@ -323,6 +334,9 @@ document.addEventListener('DOMContentLoaded', () => {
     hideTimer();
     setTxt(timerText, '');
     if (timerFill) timerFill.style.width = '0%';
+
+    // NUEVO: por las dudas, desactivar ronda
+    rondaActiva = false;
   }
 
   // ===== Eventos =====
@@ -368,6 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
     hideTimer();
     setTxt(timerText, '');
     if (timerFill) timerFill.style.width = '0%';
+
+    rondaActiva = false; // reset guard
   });
 
   // Restaurar prefs de dificultad/rondas
@@ -381,12 +397,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== Tema (default LIGHT, dark como opción) =====
   function labelFor(mode){
-    // Texto describe la acción a realizar
     return mode === 'dark' ? 'Usar modo claro' : 'Usar modo oscuro';
   }
   function applyTheme(mode){
     const m = (mode === 'dark') ? 'dark' : 'light'; // default light
-    // aplicamos el atributo en <body> para que afecte todo el contenido
     document.body.setAttribute('data-theme', m);
 
     if (themeBtn){
@@ -397,7 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (metaTheme) metaTheme.setAttribute('content', m === 'dark' ? '#0b0b0b' : '#f8fbf4');
   }
   (function initTheme(){
-    // DEFAULT: light, salvo preferencia guardada
     let mode = 'light';
     try{
       const stored = localStorage.getItem('theme');
