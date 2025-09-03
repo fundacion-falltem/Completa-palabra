@@ -1,5 +1,5 @@
 /* ======================================================
-   FALLTEM — Completa la palabra (CSS adaptado)
+   FALLTEM — Completa la palabra (CSS adaptado y corregido)
    - Mantiene tus clases/estructura
    - Paleta y tipografía de FALLTEM
    - Claro por defecto, dark opcional con [data-theme="dark"]
@@ -24,8 +24,9 @@
 
   /* Marca */
   --focus:#5fcbe0;         /* celeste (foco/acción secundaria) */
+  --accent-2:#5fcbe0;      /* celeste de marca (para pista/callouts) */
   --ok:#99cd68;            /* verde marca */
-  --bad:#ef4444;           /* error (conservamos rojo accesible) */
+  --bad:#ef4444;           /* error */
 
   /* Botones */
   --btn-primary-bg:#99cd68;  --btn-primary-fg:#08340f;
@@ -33,7 +34,7 @@
 
   /* Timer */
   --timer-ok:  var(--ok);
-  --timer-warn:#e8b75b;      /* amarillo de marca para “quedan pocos segundos” */
+  --timer-warn:#e8b75b;      /* amarillo de marca */
 }
 
 /* ===== Dark opcional ===== */
@@ -42,6 +43,7 @@
   --card:#171717; --border:#2a2a2a;
 
   --focus:#5fcbe0;
+  --accent-2:#5fcbe0;
   --ok:#99cd68; --bad:#ef4444;
 
   --btn-primary-bg:#99cd68; --btn-primary-fg:#0a0a0a;
@@ -178,7 +180,34 @@ select{
   background: color-mix(in oklab, var(--bad) 10%, var(--card));
 }
 
-.pista{ margin:.6rem 0 0; }
+/* Texto de ayuda / feedback */
+/* Pista visible, con buen contraste y respetando [hidden] */
+.pista[hidden]{ display:none !important; }
+.pista:empty{ display:none; }
+
+.pista:not([hidden]){
+  display:block;
+  background: color-mix(in oklab, var(--accent-2) 18%, transparent);
+  border: 1px solid color-mix(in oklab, var(--accent-2) 55%, transparent);
+  color: #072a32;
+  padding: .7rem .9rem;
+  border-radius: 12px;
+  margin: .2rem 0 .8rem;
+  font-weight: 700;
+}
+.pista:not([hidden]):not(:empty)::before{
+  content: "💡 ";
+  font-weight: 900;
+  margin-right: .25rem;
+}
+
+/* Dark: un poco más intenso y texto claro */
+[data-theme="dark"] .pista:not([hidden]){
+  color:#eaf9ff;
+  background: color-mix(in oklab, var(--accent-2) 26%, transparent);
+  border-color: color-mix(in oklab, var(--accent-2) 70%, transparent);
+}
+
 .feedback{ margin:.6rem 0 0; font-weight:800; }
 .feedback.ok{ color:var(--ok) }
 .feedback.bad{ color:var(--bad) }
@@ -236,4 +265,13 @@ select{
 @supports not (color: color-mix(in oklab, red 50%, white)){
   .opcion-btn.ok{ background:#eef8ea; }
   .opcion-btn.bad{ background:#feecec; }
+  .pista{
+    background:#e6f7fc;           /* celeste claro fallback */
+    border:1px solid #b3e6f6;
+  }
+  [data-theme="dark"] .pista{
+    background:#1c2c33;
+    border-color:#276b80;
+    color:#eaf9ff;
+  }
 }
