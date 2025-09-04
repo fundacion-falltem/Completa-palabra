@@ -1,7 +1,7 @@
 {
   "facil": [
     { "hueco": "C__A",  "opciones": ["CAMA","CASA","CEJA","CIMA"],  "ok": 1, "pista": "Vivienda / lugar para vivir" },
-    { "hueco": "P_A",   "opciones": ["PIE","PALA","PEA","PAN"],     "ok": 3, "pista": "Alimento básico" },
+    { "hueco": "P_N",   "opciones": ["PIE","PALA","PEA","PAN"],     "ok": 3, "pista": "Alimento básico" },
     { "hueco": "S__A",  "opciones": ["SOPA","SEÑA","SALA","SOGA"],  "ok": 0, "pista": "Comida líquida caliente" },
     { "hueco": "M_NO",  "opciones": ["MANO","MONO","MENO","MINO"],  "ok": 0, "pista": "Parte del cuerpo" },
     { "hueco": "R_TA",  "opciones": ["RUTA","RATA","ROTA","RETA"],  "ok": 1, "pista": "Animal pequeño" },
@@ -17,7 +17,7 @@
     { "hueco": "PE__O", "opciones": ["PESNO","PEDRO","PERRO","PESO"],"ok": 2, "pista": "Animal doméstico" },
     { "hueco": "S_LA",  "opciones": ["SOLA","SALA","SELA","SILA"],  "ok": 1, "pista": "Ambiente de una casa" },
     { "hueco": "CA_O",  "opciones": ["CASO","CANO","CANTO","CARGO"],"ok": 0, "pista": "Asunto / ejemplo" },
-    { "hueco": "P__Z",  "opciones": ["PAZ","PEZ","PIZ","PUZ"],      "ok": 1, "pista": "Animal acuático" },
+    { "hueco": "P_Z",  "opciones": ["PAZ","PEZ","PIZ","PUZ"],      "ok": 1, "pista": "Animal acuático" },
     { "hueco": "M__A",  "opciones": ["MESA","MUSA","MODA","MENA"],  "ok": 0, "pista": "Mueble para comer" },
     { "hueco": "F__O",  "opciones": ["FARO","FOTO","FILO","FUEO"],  "ok": 1, "pista": "Imagen capturada" }
   ],
