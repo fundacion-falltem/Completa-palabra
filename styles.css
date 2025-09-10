@@ -1,128 +1,139 @@
 /* ======================================================
-   FALLTEM — Completa la palabra (CSS adaptado y corregido)
-   - Mantiene tus clases/estructura
-   - Paleta y tipografía de FALLTEM
+   FALLTEM — Completa la palabra — CSS limpio v1.3
+   - No cambia tu HTML ni clases existentes
    - Claro por defecto, dark opcional con [data-theme="dark"]
+   - FABs con misma lógica que el resto de juegos
    ====================================================== */
 
-/* ===== Tema base accesible (FALLTEM) ===== */
+/* ===== Tokens ===== */
 :root{
   color-scheme: light dark;
 
   --fs-base: clamp(18px, 1.2vw + 14px, 22px);
   --space:    clamp(12px, 1vw + 8px, 18px);
-
-  /* Tipografía */
   --font: "Montserrat", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
-  /* --- Paleta FALLTEM (modo CLARO por defecto) --- */
-  --bg:#f8fbf4;            /* fondo */
-  --fg:#1b1b1b;            /* texto */
-  --muted:#50380b;         /* texto secundario */
-  --card:#ffffff;          /* superficies */
-  --border:#e5e7eb;        /* bordes suaves */
+  /* Light */
+  --bg:#f8fbf4; --fg:#1b1b1b; --muted:#50380b;
+  --card:#ffffff; --border:#e5e7eb;
 
   /* Marca */
-  --focus:#5fcbe0;         /* celeste (foco/acción secundaria) */
-  --accent-2:#5fcbe0;      /* celeste de marca (para pista/callouts) */
-  --ok:#99cd68;            /* verde marca */
-  --bad:#ef4444;           /* error */
+  --accent:#99cd68;     /* verde */
+  --accent-2:#5fcbe0;   /* celeste foco/ayuda */
+  --warn:#e8b75b;
 
   /* Botones */
-  --btn-primary-bg:#99cd68;  --btn-primary-fg:#08340f;
-  --btn-sec-bg:#5fcbe0;      --btn-sec-fg:#072a32;
+  --btn-primary-bg: var(--accent);   --btn-primary-fg:#08340f;
+  --btn-sec-bg:     var(--accent-2); --btn-sec-fg:#072a32;
+
+  /* Estados */
+  --ok:#22c55e;   /* feedback correcto */
+  --bad:#ef4444;  /* feedback incorrecto */
 
   /* Timer */
-  --timer-ok:  var(--ok);
-  --timer-warn:#e8b75b;      /* amarillo de marca */
+  --timer-ok:   var(--accent);
+  --timer-warn: var(--warn);
+
+  /* Focus */
+  --focus: var(--accent-2);
 }
 
-/* ===== Dark opcional ===== */
+/* Dark */
 [data-theme="dark"]{
   --bg:#0b0b0b; --fg:#f5f5f5; --muted:#cfcfcf;
   --card:#171717; --border:#2a2a2a;
 
-  --focus:#5fcbe0;
-  --accent-2:#5fcbe0;
-  --ok:#99cd68; --bad:#ef4444;
+  --btn-primary-bg: var(--accent);   --btn-primary-fg:#0a0a0a;
+  --btn-sec-bg:     var(--accent-2); --btn-sec-fg:#0a0a0a;
 
-  --btn-primary-bg:#99cd68; --btn-primary-fg:#0a0a0a;
-  --btn-sec-bg:#5fcbe0;     --btn-sec-fg:#0a0a0a;
-
-  --timer-ok:  var(--ok);
-  --timer-warn:#e8b75b;
+  --timer-ok:   var(--accent);
+  --timer-warn: var(--warn);
 }
 
 /* ===== Base ===== */
-*{box-sizing:border-box}
-html,body{height:100%}
-html{-webkit-text-size-adjust:100%; text-size-adjust:100%}
+*{ box-sizing:border-box }
+html,body{ height:100% }
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100% }
 body{
   margin:0; background:var(--bg); color:var(--fg);
-  font-family: var(--font);
-  font-size:var(--fs-base);
-  line-height:1.7;                 /* más aire */
-  letter-spacing:.15px;
+  font-family:var(--font); font-size:var(--fs-base);
+  line-height:1.7; letter-spacing:.15px;
   padding-bottom: calc(env(safe-area-inset-bottom, 0) + var(--space));
   -webkit-tap-highlight-color: transparent;
 }
 
-.wrap{ max-width: 900px; width: min(900px, calc(100% - 2*var(--space))); margin: 0 auto; padding: var(--space); }
+.wrap{ max-width: 900px; width:min(900px, calc(100% - 2*var(--space))); margin:0 auto; padding:var(--space) }
+
 .header h1{
   font-size: clamp(1.8rem, 2vw + 1rem, 2.4rem);
-  margin:.5rem 0; font-weight: 900; letter-spacing:.2px;
+  margin:.5rem 0; font-weight:900; letter-spacing:.2px;
 }
-.intro{ margin:0 0 var(--space); }
+.intro{ margin:0 0 var(--space) }
 
 .card{
   background:var(--card); border:1px solid var(--border);
-  border-radius:1rem; padding:var(--space);
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  border-radius:16px; padding:var(--space);
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
 
 /* ===== Controles ===== */
 .controles{
-  display:grid; gap:1.1rem; grid-template-columns: 1fr;
-  margin-bottom: calc(var(--space) * 1.1);  /* +aire antes del juego */
+  display:grid; gap:1rem;
+  grid-template-columns: 1fr;
+  margin-bottom: calc(var(--space) * 1.1);
 }
-.control label{ font-weight:800; }
 
-/* Selects con estilo */
+.control{ display:grid; gap:.5rem }
+label{ font-weight:800; }
+
+/* Selects */
 select{
-  appearance:none; background:var(--card); color:var(--fg); border:1px solid var(--border);
-  border-radius:.8rem; padding:.7rem 1rem; width:100%;
-  background-image:url("data:image/svg+xml;utf8,<svg fill='currentColor' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5.5 7l4.5 5 4.5-5z'/></svg>");
-  background-repeat:no-repeat; background-position:right 1rem center; background-size:1rem; padding-right:2.5rem;
+  appearance:none; background:var(--card); color:var(--fg);
+  border:1px solid var(--border);
+  padding:.8rem 1rem; border-radius:.8rem; width:100%; font-size:1.05rem;
+  background-image:url("data:image/svg+xml;utf8,<svg fill='currentColor' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path d='M5.5 7l4.5 5 4.5-5z'/></svg>");
+  background-repeat:no-repeat; background-position:right 1rem center; background-size:1rem; padding-right:2.4rem;
 }
+select:focus-visible{ outline:3px solid var(--focus); outline-offset:3px; border-color:var(--focus) }
 
 /* Botonera */
 .buttons{
-  display:flex; gap:.8rem; flex-wrap:wrap;
-  justify-content:center;                           /* centrados por jerarquía */
-  margin-top: .2rem;
+  display:flex; gap:.8rem; flex-wrap:wrap; justify-content:center;
 }
+
+/* Botones base */
 .btn{
-  border:0; border-radius:1rem; cursor:pointer; font-weight:800;
-  padding:1rem 1.2rem; min-height:50px; font-size:1.05rem;
-  transition: transform .08s ease, filter .15s ease, box-shadow .15s ease,
-              background-color .15s ease, color .15s ease;
+  border:0; border-radius:16px; cursor:pointer; font-weight:800;
+  padding:1rem 1.2rem; min-height:52px; font-size:1.05rem;
+  transition: transform .08s ease, filter .15s ease, box-shadow .15s ease, background-color .15s ease, color .15s ease;
 }
 .btn:hover{ transform:translateY(-1px); filter:brightness(1.04) }
-.btn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
-.btn.principal{  background:var(--btn-primary-bg); color:var(--btn-primary-fg); }
-.btn.secundario{ background:var(--btn-sec-bg);     color:var(--btn-sec-fg); }
+.btn:focus-visible{ outline:3px solid var(--focus); outline-offset:2px }
+.btn.principal{  background:var(--btn-primary-bg); color:var(--btn-primary-fg) }
+.btn.secundario{ background:var(--btn-sec-bg);   color:var(--btn-sec-fg) }
+
+/* Comenzar ancho y centrado */
+#btnComenzar{
+  width: clamp(260px, 60vw, 560px);
+}
+
+/* Reiniciar (si se muestra) del mismo ancho */
+#btnReiniciar{
+  width: clamp(260px, 60vw, 560px);
+}
 
 /* ===== Juego ===== */
-.juego{ display:grid; gap: .9rem; }
+.juego{ display:grid; gap:.9rem }
 
 /* Progreso */
-.progresoBar{height:10px; background:var(--border); border-radius:999px; overflow:hidden}
-#pbFill{height:100%; width:0%; background:var(--btn-primary-bg); transition:width .2s linear}
+.progresoBar{ height:10px; background:var(--border); border-radius:999px; overflow:hidden }
+#pbFill{ height:100%; width:0%; background:var(--btn-primary-bg); transition: width .2s linear }
 
 /* Timer */
-.timer-text{ margin:.2rem 0; font-weight:800; }
+.timer-text{ margin:.2rem 0; font-weight:800 }
 .timerBar{
-  height:10px; border-radius:999px; background:color-mix(in oklab, var(--border) 80%, transparent);
+  height:10px; border-radius:999px;
+  background: color-mix(in oklab, var(--border) 80%, transparent);
   overflow:hidden;
 }
 #timerFill{
@@ -131,15 +142,13 @@ select{
   transition: width .1s linear, background-color .15s ease;
 }
 .timer-alert{ color: var(--timer-warn) !important; }
-.timer-pulse{ animation: timerPulse .9s ease-in-out infinite; }
+.timer-pulse{ animation: timerPulse .9s ease-in-out infinite }
 @keyframes timerPulse{
-  0%{ transform: translateZ(0) scale(1); }
-  50%{ transform: translateZ(0) scale(1.03); }
-  100%{ transform: translateZ(0) scale(1); }
+  0%{ transform:scale(1) } 50%{ transform:scale(1.03) } 100%{ transform:scale(1) }
 }
 
-/* Enunciado y hueco */
-.enunciado{ font-weight:800; margin:.2rem 0 .6rem; }
+/* Enunciado + hueco */
+.enunciado{ font-weight:800; margin:.2rem 0 .6rem }
 .hueco{
   font-weight:900; letter-spacing:.04em;
   font-size: clamp(1.6rem, 1.2vw + 1.2rem, 2rem);
@@ -150,20 +159,21 @@ select{
 
 /* Opciones */
 .opciones{
-  display:grid; gap:.9rem; grid-template-columns: 1fr; margin-top:.2rem;
+  display:grid; gap:1rem; grid-template-columns:1fr;
 }
-@media (min-width: 680px){ .opciones{ grid-template-columns: 1fr 1fr; } }
+@media (min-width:680px){ .opciones{ grid-template-columns:1fr 1fr } }
 
 .opcion-btn{
   text-align:left; background:var(--card); color:var(--fg);
-  border:2px solid var(--border); border-radius:1rem;
+  border:2px solid var(--border); border-radius:16px;
   padding:1rem 1.1rem; font-weight:800;
-  font-size: clamp(1.05rem, 0.6vw + 1rem, 1.25rem);
+  font-size: clamp(1.05rem, .6vw + 1rem, 1.25rem);
   cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.08);
   transition: transform .15s ease, filter .15s ease, border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 .opcion-btn strong{ margin-right:.4rem }
-.opcion-btn:hover, .opcion-btn:focus-visible{
+.opcion-btn:hover,
+.opcion-btn:focus-visible{
   filter:brightness(1.06); transform:translateY(-1px);
   outline:3px solid var(--focus); outline-offset:2px;
 }
@@ -180,98 +190,91 @@ select{
   background: color-mix(in oklab, var(--bad) 10%, var(--card));
 }
 
-/* Texto de ayuda / feedback */
-/* Pista visible, con buen contraste y respetando [hidden] */
-.pista[hidden]{ display:none !important; }
-.pista:empty{ display:none; }
-
+/* Pista */
+.pista[hidden]{ display:none !important }
+.pista:empty{ display:none }
 .pista:not([hidden]){
   display:block;
   background: color-mix(in oklab, var(--accent-2) 18%, transparent);
   border: 1px solid color-mix(in oklab, var(--accent-2) 55%, transparent);
-  color: #072a32;
-  padding: .7rem .9rem;
-  border-radius: 12px;
-  margin: .2rem 0 .8rem;
-  font-weight: 700;
+  color:#072a32;
+  padding:.7rem .9rem; border-radius:12px; margin:.2rem 0 .8rem; font-weight:700;
 }
-.pista:not([hidden]):not(:empty)::before{
-  content: "💡 ";
-  font-weight: 900;
-  margin-right: .25rem;
-}
-
-/* Dark: un poco más intenso y texto claro */
+.pista:not([hidden]):not(:empty)::before{ content:"💡 "; font-weight:900; margin-right:.25rem }
 [data-theme="dark"] .pista:not([hidden]){
   color:#eaf9ff;
   background: color-mix(in oklab, var(--accent-2) 26%, transparent);
   border-color: color-mix(in oklab, var(--accent-2) 70%, transparent);
 }
 
-.feedback{ margin:.6rem 0 0; font-weight:800; }
-.feedback.ok{ color:var(--ok) }
-.feedback.bad{ color:var(--bad) }
-
-.estado{ margin-top:1rem }
+/* Feedback + HUD */
+.feedback{ margin:.6rem 0 0; font-weight:800 }
+.feedback.ok{ color:var(--ok) } .feedback.bad{ color:var(--bad) }
+.estado{ margin-top:1rem } .estado p{ margin:.2rem 0 }
 .muted{ color:var(--muted) }
 
-/* ===== Ayuda / modal ===== */
-.fixed-top-right{position:fixed; right:12px; top:12px; z-index:10}
-.btn-fab{
-  width:44px;height:44px;border-radius:50%;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:1.2rem;
-  background:var(--btn-sec-bg); color:var(--btn-sec-fg); border:0; cursor:pointer;
-  box-shadow:0 2px 6px rgba(0,0,0,.2);
-}
-.btn-fab:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+/* ===== FABs (¿? y tema) — misma lógica que otros juegos ===== */
+.fixed-top-right{ position:fixed; right:12px; top:12px; z-index:10 }
 
-.modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:20}
-.modal[aria-hidden="false"]{display:block}
+.btn-fab{
+  width:48px; height:48px; border-radius:50%; border:0; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-weight:900; font-size:1.1rem;
+  box-shadow:0 6px 22px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.10);
+  transition: transform .08s ease, filter .15s ease, box-shadow .15s ease, background-color .15s ease, color .15s ease;
+}
+.btn-fab:hover{ transform:translateY(-1px); filter:brightness(1.04) }
+.btn-fab:focus-visible{ outline:3px solid var(--focus); outline-offset:3px }
+
+/* En modo claro: ? celeste / Botón tema “oscuro” */
+[data-theme="light"] #aboutBtn{ background: var(--accent-2); color:#072a32 }
+[data-theme="light"] #themeToggle{ background:#1f2733; color:#fff }
+
+/* En modo oscuro: ambos celestes con ícono ☀️ */
+[data-theme="dark"] #aboutBtn,
+[data-theme="dark"] #themeToggle{ background: var(--accent-2); color:#0a0a0a }
+
+/* ===== Modal ===== */
+.modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:20 }
+.modal[aria-hidden="false"]{ display:block }
 .modal-card{
   max-width:min(820px, 100% - 2*var(--space));
+  max-height:min(86vh, 100% - 2*var(--space));
   margin:6vh auto; background:var(--card); color:var(--fg);
-  padding:var(--space); border-radius:1rem; border:1px solid var(--border);
+  padding:var(--space); border-radius:16px; border:1px solid var(--border);
+  box-shadow:0 4px 14px rgba(0,0,0,.15);
+  overflow:auto; /* scrolleable en móviles */
 }
 .mt0{ margin-top:0 }
-.modal-actions{ display:flex; gap:.6rem; justify-content:flex-end; }
+.modal-actions{ display:flex; gap:.6rem; justify-content:flex-end }
 
-/* ===== Skip link / footer ===== */
+/* ===== Skip link / Footer ===== */
 .skip{ position:absolute; left:-9999px; top:auto }
 .skip:focus{
   left:12px; top:12px; background:var(--btn-primary-bg); color:var(--btn-primary-fg);
-  padding:8px 10px; border-radius:8px; z-index:1000
+  padding:8px 10px; border-radius:8px; z-index:1000;
 }
 
 .mini-credit{
   margin-top:.8rem; padding:.6rem 0; border-top:1px solid var(--border);
   font-size:.85em; line-height:1.35; color:var(--muted);
 }
-.mini-credit a{ color:inherit; text-decoration:underline; font-weight:700 }
+.mini-credit a{ color:inherit; font-weight:700; text-decoration:underline }
 .mini-label{ font-weight:900; color:var(--fg) }
 
-/* ===== Aire extra en móvil ===== */
-@media (max-width: 600px){
-  .enunciado{ margin-bottom: 1rem; }
-  .opciones{ gap: 1rem; }
+/* ===== Resp & Prefs ===== */
+@media (max-width:600px){
+  .opciones{ gap:1rem }
+  .enunciado{ margin-bottom:1rem }
 }
-
-/* ===== Preferencias de usuario ===== */
 @media (prefers-reduced-motion: reduce){
-  *{ transition:none !important; animation:none !important }
+  *{ transition:none !important; animation:none !important; scroll-behavior:auto !important }
 }
 
 /* ===== Fallback color-mix ===== */
 @supports not (color: color-mix(in oklab, red 50%, white)){
-  .opcion-btn.ok{ background:#eef8ea; }
-  .opcion-btn.bad{ background:#feecec; }
-  .pista{
-    background:#e6f7fc;           /* celeste claro fallback */
-    border:1px solid #b3e6f6;
-  }
-  [data-theme="dark"] .pista{
-    background:#1c2c33;
-    border-color:#276b80;
-    color:#eaf9ff;
-  }
+  .opcion-btn.ok{ background:#eaf7e9 }
+  .opcion-btn.bad{ background:#feecec }
+  .pista{ background:#e6f7fc; border:1px solid #b3e6f6; color:#072a32 }
+  [data-theme="dark"] .pista{ background:#1c2c33; border-color:#276b80; color:#eaf9ff }
 }
