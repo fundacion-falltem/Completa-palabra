@@ -1,0 +1,21 @@
+{
+  "name": "Completa la palabra — FALLTEM",
+  "short_name": "Completa",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fbf4",
+  "theme_color": "#99cd68",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./images/completa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/completa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
