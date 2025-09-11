@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ===== Versión ===== */
-  const VERSION = 'Completa-palabra v1.5.0 (pista opcional con botón)';
+  const VERSION = 'Completa-palabra v1.5.0';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
