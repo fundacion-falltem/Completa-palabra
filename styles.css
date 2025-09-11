@@ -1,5 +1,5 @@
 /* ======================================================
-   FALLTEM — Completa la palabra — CSS limpio v1.4
+   FALLTEM — Completa la palabra — CSS limpio v1.5
    - Claro por defecto, dark opcional con [data-theme="dark"]
    - Misma lógica visual que el resto de juegos
    ====================================================== */
@@ -97,6 +97,12 @@ select:focus-visible{ outline:3px solid var(--focus); outline-offset:3px; border
 #btnComenzar{ width: clamp(260px, 60vw, 560px) }
 #btnReiniciar{ width: clamp(260px, 60vw, 560px) }
 
+/* Botón de pista */
+#btnPista{
+  margin: .6rem auto clamp(1rem, 1.2vw + .6rem, 1.6rem) auto;
+  width: clamp(220px, 60%, 360px);
+  display: block;
+}
 
 /* Botonera de cierre centrada y consistente */
 .acciones{
@@ -116,7 +122,6 @@ select:focus-visible{ outline:3px solid var(--focus); outline-offset:3px; border
 
 /* Por si tu tema general no lo cubre para todos los .btn en forma de <a> */
 a.btn { text-decoration: none; }
-
 
 /* ===== Juego ===== */
 .juego{ display:grid; gap:.9rem; margin-top: var(--space) }

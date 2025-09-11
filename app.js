@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ===== Versión ===== */
-  const VERSION = 'Completa-palabra v1.4.2 (UI conectada a HTML actual)';
+  const VERSION = 'Completa-palabra v1.5.0 (pista opcional con botón)';
   const versionEl = document.getElementById('versionLabel');
   if (versionEl) versionEl.textContent = VERSION;
 
@@ -76,8 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ===== Estado y referencias ===== */
-  let nivel = 'media';                  // default
-  let rondasTotales = 8;                // no hay select de rondas en tu HTML
+  let nivel = 'media';
+  let rondasTotales = 8;
   let ronda = 0, aciertos = 0;
   let itemActual = null;
   let poolActual = [];
@@ -131,11 +131,21 @@ document.addEventListener('DOMContentLoaded', () => {
     hueco.className = 'hueco';
     tarjeta.appendChild(hueco);
 
+    // Pista (creada pero oculta por defecto)
     const pista = document.createElement('p');
     pista.id = 'pista';
     pista.className = 'pista';
     pista.hidden = true;
     tarjeta.appendChild(pista);
+
+    // Botón para mostrar pista (visible sólo si hay pista disponible)
+    const btnPista = document.createElement('button');
+    btnPista.id = 'btnPista';
+    btnPista.className = 'btn secundario';
+    btnPista.type = 'button';
+    btnPista.textContent = 'Mostrar pista';
+    btnPista.hidden = true;
+    tarjeta.appendChild(btnPista);
 
     const opciones = document.createElement('div');
     opciones.className = 'opciones';
@@ -150,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fb.setAttribute('aria-atomic','true');
     tarjeta.appendChild(fb);
 
-    return { tarjeta, enu, hueco, pista, opciones, fb };
+    return { tarjeta, enu, hueco, pista, btnPista, opciones, fb };
   }
 
   /* ===== Lógica de juego ===== */
@@ -172,20 +182,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Construir/limpiar contenedor
     juegoEl.innerHTML = '';
-    const { tarjeta, hueco, pista, opciones, fb } = plantillaTarjeta();
+    const { tarjeta, hueco, pista, btnPista, opciones, fb } = plantillaTarjeta();
     juegoEl.appendChild(tarjeta);
 
-    // Pista
+    // Pista (ahora opcional con botón)
     let pistaTexto = base.pista;
     if (!pistaTexto && typeof palabraCorrecta === 'string' && palabraCorrecta.length > 0) {
       pistaTexto = `Empieza con “${palabraCorrecta[0]}” y tiene ${palabraCorrecta.length} letras.`;
     }
     if (pistaTexto){
-      pista.hidden = false;
+      pista.hidden = true;                       // oculta inicialmente
       pista.textContent = `Pista: ${pistaTexto}`;
+      btnPista.hidden = false;                   // muestra el botón
+      btnPista.onclick = ()=>{
+        pista.hidden = false;                    // revela pista
+        btnPista.hidden = true;                  // oculta el botón
+      };
     } else {
       pista.hidden = true;
       pista.textContent = '';
+      btnPista.hidden = true;
     }
 
     // Hueco
@@ -271,71 +287,70 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function finJuego(){
-  // Limpia el contenedor del juego
-  juegoEl.innerHTML = '';
+    // Limpia el contenedor del juego
+    juegoEl.innerHTML = '';
 
-  // ---- Tarjeta de cierre ----
-  const tarjeta = document.createElement('div');
-  tarjeta.className = 'tarjeta';
+    // ---- Tarjeta de cierre ----
+    const tarjeta = document.createElement('div');
+    tarjeta.className = 'tarjeta';
 
-  // Mensaje según desempeño
-  const ratio = aciertos / rondasTotales;
-  let titulo, msj;
-  if (ratio >= 0.85){
-    titulo = '🎉 ¡Excelente!';
-    msj = `Lograste ${aciertos} de ${rondasTotales}. Podés subir la dificultad cuando quieras.`;
-  } else if (ratio >= 0.6){
-    titulo = '👏 ¡Bien hecho!';
-    msj = `Resultado: ${aciertos} de ${rondasTotales}. Seguí practicando y probá subir la dificultad cuando te sientas cómodo.`;
-  } else if (ratio >= 0.35){
-    titulo = '💪 ¡Buen intento!';
-    msj = `${aciertos} de ${rondasTotales}. Arrancá con “Fácil” y andá subiendo a tu ritmo.`;
-  } else {
-    titulo = '🌱 ¡Muy bien por practicar!';
-    msj = `${aciertos} de ${rondasTotales}. Probá sesiones cortas y constantes, sin apuro.`;
+    // Mensaje según desempeño
+    const ratio = aciertos / rondasTotales;
+    let titulo, msj;
+    if (ratio >= 0.85){
+      titulo = '🎉 ¡Excelente!';
+      msj = `Lograste ${aciertos} de ${rondasTotales}. Podés subir la dificultad cuando quieras.`;
+    } else if (ratio >= 0.6){
+      titulo = '👏 ¡Bien hecho!';
+      msj = `Resultado: ${aciertos} de ${rondasTotales}. Seguí practicando y probá subir la dificultad cuando te sientas cómodo.`;
+    } else if (ratio >= 0.35){
+      titulo = '💪 ¡Buen intento!';
+      msj = `${aciertos} de ${rondasTotales}. Arrancá con “Fácil” y andá subiendo a tu ritmo.`;
+    } else {
+      titulo = '🌱 ¡Muy bien por practicar!';
+      msj = `${aciertos} de ${rondasTotales}. Probá sesiones cortas y constantes, sin apuro.`;
+    }
+
+    const h = document.createElement('p');
+    h.className = 'pregunta';
+    h.textContent = titulo;
+
+    const p = document.createElement('p');
+    p.textContent = msj;
+
+    const acciones = document.createElement('div');
+    acciones.className = 'acciones';
+
+    // CTA principal (en la tarjeta)
+    const rejugar = document.createElement('button');
+    rejugar.className = 'btn principal';
+    rejugar.textContent = 'Volver a jugar';
+    rejugar.addEventListener('click', ()=>{
+      ronda = 0; aciertos = 0; poolActual = [...BANK[nivel]];
+      actualizarHUD();
+      nuevaRonda();
+    });
+
+    // CTA secundario (link)
+    const aOtros = document.createElement('a');
+    aOtros.href = 'https://falltem.org/juegos/#games-cards';
+    aOtros.className = 'btn secundario';
+    aOtros.textContent = 'Elegir otro juego';
+    aOtros.target = '_blank';
+    aOtros.rel = 'noopener noreferrer';
+
+    acciones.appendChild(rejugar);
+    acciones.appendChild(aOtros);
+
+    tarjeta.appendChild(h);
+    tarjeta.appendChild(p);
+    tarjeta.appendChild(acciones);
+    juegoEl.appendChild(tarjeta);
+
+    // Ocultar botones de cabecera
+    if (btnComenzar)  btnComenzar.hidden  = true;
+    if (btnReiniciar) btnReiniciar.hidden = true;
   }
-
-  const h = document.createElement('p');
-  h.className = 'pregunta';
-  h.textContent = titulo;
-
-  const p = document.createElement('p');
-  p.textContent = msj;
-
-  const acciones = document.createElement('div');
-  acciones.className = 'acciones';
-
-  // CTA principal (en la tarjeta)
-  const rejugar = document.createElement('button');
-  rejugar.className = 'btn principal';
-  rejugar.textContent = 'Volver a jugar';
-  rejugar.addEventListener('click', ()=>{
-    ronda = 0; aciertos = 0; poolActual = [...BANK[nivel]];
-    actualizarHUD();
-    nuevaRonda();
-  });
-
-  // CTA secundario (link)
-  const aOtros = document.createElement('a');
-  aOtros.href = 'https://falltem.org/juegos/#games-cards';
-  aOtros.className = 'btn secundario';
-  aOtros.textContent = 'Elegir otro juego';
-  aOtros.target = '_blank';
-  aOtros.rel = 'noopener noreferrer';
-
-  acciones.appendChild(rejugar);
-  acciones.appendChild(aOtros);
-
-  tarjeta.appendChild(h);
-  tarjeta.appendChild(p);
-  tarjeta.appendChild(acciones);
-  juegoEl.appendChild(tarjeta);
-
-  // IMPORTANTE: ocultar los botones de cabecera para que no dupliquen el CTA
-  if (btnComenzar)  btnComenzar.hidden  = true;
-  if (btnReiniciar) btnReiniciar.hidden = true;
-}
-
 
   /* ===== Eventos principales ===== */
   btnComenzar?.addEventListener('click', async ()=>{
