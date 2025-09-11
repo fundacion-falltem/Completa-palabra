@@ -1,60 +1,60 @@
 <!doctype html>
-<html lang="es-AR">
+<html lang="es-AR" data-theme="light">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="description" content="Juego cognitivo: completar palabras con pistas. Accesible, sin datos personales."/>
+  <meta name="theme-color" content="#f8fbf4"/>
+  <meta name="color-scheme" content="dark light"/>
 
-  <title>Completa la palabra — Juegos Cognitivos FALLTEM</title>
-  <meta name="description" content="Juego cognitivo accesible para completar palabras: lenguaje y memoria semántica." />
-
-  <!-- Arrancamos en claro, con soporte dark -->
-  <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8fbf4">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#0b0b0b">
+  <!-- CSP (ajusta si cambias orígenes) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;
+                 connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin"/>
 
-  <!-- CSP estricta (+ Google Fonts). Si usás fuentes locales, quitá *.google* y dejá 'self' -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 script-src 'self';
-                 style-src 'self' https://fonts.googleapis.com;
-                 font-src 'self' https://fonts.gstatic.com data:;
-                 img-src 'self' data:;
-                 connect-src 'self';
-                 object-src 'none';
-                 base-uri 'none';
-                 frame-ancestors 'none';
-                 form-action 'none'">
-
-  <!-- Montserrat -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="./styles.css?v=1.2.1">
+  <title>Completa la palabra — FALLTEM</title>
+  <link rel="stylesheet" href="./styles.css?v=1.4.0">
 </head>
-<body data-theme="light">
+
+<body>
+  <!-- Skip link -->
   <a href="#juego" class="skip">Saltar directamente al juego</a>
 
-  <!-- Botón de ayuda (FAB) -->
-  <div class="fixed-top-right">
-    <button id="aboutBtn" class="btn-fab" type="button"
-            aria-haspopup="dialog" aria-controls="aboutModal"
-            aria-expanded="false" aria-label="¿Por qué este juego?">?</button>
+  <!-- FABs (¿ y Tema). Importante: sólo un #themeToggle en toda la página -->
+  <div class="fab-stack" aria-hidden="false">
+    <button id="aboutBtn" class="fab fab--help" type="button"
+            aria-haspopup="dialog" aria-controls="aboutModal" aria-expanded="false"
+            aria-label="¿Por qué este juego?">?</button>
+
+    <button id="themeToggle" class="fab fab--theme" type="button"
+            aria-pressed="false" aria-label="Usar modo oscuro">🌙</button>
   </div>
 
-  <!-- Modal “¿Por qué este juego?” -->
-  <div id="aboutModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="aboutTitle">
+  <!-- Modal ayuda (accesible y scrolleable) -->
+  <div id="aboutModal" class="modal" role="dialog" aria-modal="true"
+       aria-hidden="true" aria-labelledby="aboutTitle">
     <div class="modal-card" role="document">
       <h2 id="aboutTitle" class="mt0">¿Por qué este juego?</h2>
-      <p>Ejercita <strong>lenguaje</strong>, <strong>memoria semántica</strong> y <strong>atención</strong>.
-         Completá la palabra correcta entre opciones A–D.</p>
+
+      <p>Este ejercicio entrena <strong>memoria de trabajo verbal</strong>, <strong>atención</strong> y
+         <strong>estrategias</strong> para recuperar palabras a partir de pistas. Sin límite de tiempo.</p>
+
+      <h3>Cómo se juega</h3>
       <ul>
-        <li>Sesiones cortas (5–10 min), 2–3 veces por semana.</li>
-        <li>Empezá en <strong>Fácil</strong>, subí cuando resulte cómodo.</li>
-        <li>Se puede responder con teclado: <strong>A–D</strong>.</li>
+        <li>Elegí <strong>dificultad</strong> y presioná <strong>Comenzar</strong>.</li>
+        <li>Leé la pista y completá la palabra faltante.</li>
+        <li>Podés intentarlo con calma; el objetivo es ejercitar, no competir.</li>
       </ul>
+
+      <h3>Sugerencias de práctica</h3>
+      <ul>
+        <li>Sesiones de <strong>5–10 minutos</strong>, <strong>2–3 veces por semana</strong>.</li>
+        <li>Si resulta fácil, subí la dificultad gradualmente.</li>
+      </ul>
+
       <p class="muted"><small>Actividad <strong>lúdica</strong>; no es práctica médica. No recolectamos datos personales.</small></p>
+
       <div class="modal-actions">
         <button id="aboutClose" class="btn principal" type="button">Entendido</button>
       </div>
@@ -64,76 +64,60 @@
   <main class="wrap" role="main" aria-labelledby="titulo">
     <header class="header">
       <h1 id="titulo">Completa la palabra</h1>
-      <p class="intro">Elegí la opción que completa la palabra.</p>
-    </header>
+      <p class="intro">Leé la pista y escribí la <strong>palabra correcta</strong>. Sin límite de tiempo.</p>
 
-    <!-- Controles -->
-    <section class="card" aria-label="Controles">
-      <div class="controles">
+      <!-- Controles: mantené sólo lo que tu JS necesita. Botón Comenzar ancho y centrado. -->
+      <section class="controles" aria-label="Controles del juego">
         <div class="control">
           <label for="dificultad">Dificultad</label>
           <select id="dificultad" aria-label="Elegir dificultad">
-            <option value="facil" selected>Fácil (palabras cortas)</option>
-            <option value="media">Media</option>
-            <option value="avanzada">Avanzada</option>
+            <option value="facil">Fácil</option>
+            <option value="media" selected>Media</option>
+            <option value="dificil">Difícil</option>
           </select>
         </div>
 
         <div class="control">
-          <label for="rondas">Rondas</label>
-          <select id="rondas" aria-label="Elegir número de rondas">
-            <option value="6">6</option>
-            <option value="8" selected>8</option>
-            <option value="10">10</option>
+          <label for="tamano">Tamaño</label>
+          <select id="tamano" aria-label="Elegir tamaño de texto">
+            <option value="grande" selected>Grande</option>
+            <option value="muy-grande">Muy grande</option>
           </select>
         </div>
 
-        <div class="control buttons">
-          <button id="themeToggle" class="btn secundario" type="button">Cambiar tema</button>
+        <!-- Grupo de botones (fila completa), comenzar centrado y ancho -->
+        <div class="buttons">
           <button id="btnComenzar" class="btn principal" type="button">Comenzar</button>
+          <!-- Si usás “reiniciar”, tu JS puede crearlo/mostrarlo dinámicamente -->
           <button id="btnReiniciar" class="btn secundario" type="button" hidden>Volver a jugar</button>
         </div>
-      </div>
+      </section>
+    </header>
+
+    <!-- Área de juego. Tu JS inyecta aquí la tarjeta/pistas/campos/opciones -->
+    <section id="juego" class="juego" aria-live="polite"></section>
+
+    <!-- HUD (si tu JS lo usa). Podés adaptarlo a tus métricas reales -->
+    <section class="estado" aria-live="polite" aria-atomic="true">
+      <p id="hudText" class="muted"></p>
     </section>
 
-    <!-- Juego -->
-    <section id="juego" class="card juego" aria-live="polite">
-      <div class="progresoBar" aria-hidden="true"><div id="pbFill"></div></div>
-
-      <!-- Timer por pregunta -->
-      <p id="timerText" class="timer-text" role="status" aria-live="polite" aria-atomic="true"></p>
-      <div class="timerBar" aria-hidden="true"><div id="timerFill"></div></div>
-
-      <p class="enunciado" id="enunciado" aria-live="polite">Presioná “Comenzar” para iniciar.</p>
-
-      <!-- Pista (opcional) -->
-      <p id="pista" class="pista muted" hidden></p>
-
-      <!-- Palabra con hueco -->
-      <p id="hueco" class="hueco" aria-label="Palabra a completar"></p>
-
-      <!-- Opciones A–D (JS) -->
-      <div id="opciones" class="opciones" role="group" aria-labelledby="enunciado"></div>
-
-      <!-- Feedback -->
-      <p id="feedback" class="feedback muted" role="status" aria-live="polite" aria-atomic="true"></p>
-    </section>
-
-    <!-- Estado -->
-    <section class="card estado" role="status" aria-live="polite" aria-atomic="true">
-      <p>Progreso: <strong id="progTxt">0/0</strong> · Aciertos: <strong id="aciertos">0</strong> </p>
-    </section>
-
+    <!-- Footer -->
     <footer class="mini-credit" role="contentinfo" aria-label="Créditos y aviso">
       <p>
         <strong class="mini-label">Créditos y aviso:</strong>
-        Desarrollado por <a href="https://falltem.org/" target="_blank" rel="noopener">FALLTEM</a>
-        • Código abierto (MIT) • Actividad lúdica; no es práctica médica
+        Desarrollado por <a href="https://falltem.org/" target="_blank" rel="noopener noreferrer">FALLTEM</a>
+        • Código abierto (MIT)
+        • Actividad lúdica; no es práctica médica
+        • Sin recolección de datos personales
+        <small>Versión: <strong id="versionLabel"></strong></small>
       </p>
     </footer>
   </main>
 
-  <noscript><p>Este juego necesita JavaScript para funcionar.</p></noscript>
-  <script src="./app.js?v=1.2.1" defer></script>
+  <noscript><p style="margin:1rem">Este juego necesita JavaScript para funcionar.</p></noscript>
+
+  <!-- Tu lógica de juego -->
+  <script src="./app.js?v=1.4.0" defer></script>
 </body>
 </html>
